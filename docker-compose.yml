@@ -1,0 +1,39 @@
+version: '3.1'
+
+services:
+
+  nginx-allcontrol:
+    container_name: nginx-allcontrol
+    image: nginx
+    ports:
+      - 8080:80
+    volumes:
+      - ./src:/var/www
+      - ./conf/nginx/conf.d:/etc/nginx/conf.d
+    restart: always
+    depends_on:
+      - app
+      - database-allcontrol
+
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: conf/php-fpm/Dockerfile
+    volumes:
+      - ./src/:/var/www
+
+  database-allcontrol:
+    container_name: database-allcontrol
+    image: mariadb:10.2
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: user
+      MYSQL_USER: user
+      MYSQL_DATABASE: allcontrol
+    ports:
+      - 3306:3306
+    volumes:
+      - ./tmp/db:/var/lib/mysql
+      - ./dump:/docker-entrypoint-initdb.d
